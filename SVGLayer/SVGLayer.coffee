@@ -11,9 +11,9 @@ class exports.create extends Layer
 		d = new Date()
 		t = d.getTime()
 		cName = "c" + t
-		header = '<svg class="'+cName+'"" x="0px" y="0px" width="'+options.width+'px" height="'+options.height+'px" viewBox="'+-(options.strokeWidth/2)+' '+-(options.strokeWidth/2)+' '+(options.width+options.strokeWidth/2)+' '+(options.height+options.strokeWidth/2)+'">'
+		header = "<svg class='#{cName}' x='0px' y='0px' width='#{options.width}' height='#{options.height}' viewBox='-#{options.strokeWidth/2} -#{options.strokeWidth/2} #{options.width + options.strokeWidth/2} #{options.height + options.strokeWidth/2}'>"
 		path = options.path
-		footer = '</svg>'
+		footer = "</svg>"
 
 		#Hack to get pathLength before construction
 		svgPath = new Layer
@@ -33,7 +33,7 @@ class exports.create extends Layer
 		@direction = "forward"
 		@style = {"fill":"transparent";"stroke":"#32A2E6";"stroke-linecap":"round";"stroke-width":options.strokeWidth;"stroke-dasharray":pathLength;"stroke-dashoffset":0}
 		@pathLength = pathLength
-		
+
 		#Animation Magic
 		@states.add
 			forward:
@@ -58,12 +58,3 @@ class exports.create extends Layer
 			time: options.time
 		@direction = options.direction
 		@states.next()
-
-
-
-
-
-
-
-
-

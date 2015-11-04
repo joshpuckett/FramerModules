@@ -1,0 +1,38 @@
+// Many thanks to Urs Hunkler for this handy pasteBoard helper
+// https://gist.github.com/uhunkler/5465857
+var clipboard = {
+  pasteBoard : null,
+  init : function()
+  {
+    this.pasteBoard = NSPasteboard.generalPasteboard();
+  },
+  set : function( text )
+  {
+    if( typeof text === 'undefined' ) return null;
+    if( !this.pasteBoard )
+      this.init();
+    this.pasteBoard.declareTypes_owner( [ NSPasteboardTypeString ], null );
+    this.pasteBoard.setString_forType( text, NSPasteboardTypeString );
+    return true;
+  },
+};
+
+var selection = context.selection; 
+var layer = selection[0];
+// Store the original coordinates, move to (0,0) for accurate SVG path data, move back
+var oldX = layer.frame().x();
+var oldY = layer.frame().y();
+layer.frame().x = 0;
+layer.frame().y = 0;
+var rect = [[layer frame] rect];
+var width = rect.size.width;
+var height = rect.size.height;
+var bezier = [layer bezierPath];
+var svg = [bezier svgAttributes][0];
+var svgString = svg.toString();
+layer.frame().x = oldX;
+layer.frame().y = oldY;              
+
+svgString = "\tstrokeWidth: 2\n\twidth: " + width +"\n\theight: " + height + "\n\tpath: '<path " + svgString + "></path>'"
+
+clipboard.set(svgString);
