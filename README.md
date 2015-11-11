@@ -20,11 +20,11 @@ layer = new SVGLayer
 Then paste in what the Sketch plugin copied, which will look something like this:
 
 ```coffee
-layer = new SVGLayer.create
+layer = new SVGLayer
   strokeWidth: 4
-  width: 502.6700134277344
-  height: 204.3515625057028
-  path: '<path d="M0,204.351562 C0,204.351562 383.764204,204.390625 502.670013,0"></path>'
+  width: 324
+  height: 324
+  path: '<path d="M162,324 C251.470129,324 324,251.470129 324,162 C324,72.5298705 251.470129,0 162,0 C72.5298705,0 0,72.5298705 0,162 C0,251.470129 72.5298705,324 162,324 Z"></path>'
 ```
 
 ###### Animation
@@ -35,6 +35,7 @@ Use dashOffset to animate a path from start to end.
 ```coffee
 layer = new SVGLayer
   dashOffset: 0
+  # include other constructor options from example above
 
 layer.animate
   properties:
