@@ -1,60 +1,87 @@
-class exports.create extends Layer
+"""
+SVGLayer class
+
+properties
+- linecap <string> ("round" || "square" || "butt")
+- fill <string> (css color)
+- stroke <string> (css color)
+- strokeWidth <number>
+- dashOffset <number> (from -1 to 1, defaults to 0)
+"""
+
+class exports.SVGLayer extends Layer
 
 	constructor: (options = {}) ->
-		options.strokeWidth
-		options.width = options.width + options.strokeWidth
-		options.height = options.height + options.strokeWidth
-		options.path
+		options = _.defaults options,
+			dashOffset: 1
+			strokeWidth: 2
+			stroke: "#28affa"
+			backgroundColor: null
+			clip: false
+			fill: "transparent"
+			linecap: "round"
 		super options
 
-		#HTML for the SVG DOM element, need unique class names
+		if options.fill == null
+			@fill = null
+
+		@width += options.strokeWidth / 2
+		@height += options.strokeWidth / 2
+
+		# HTML for the SVG DOM element, need unique class names
 		d = new Date()
 		t = d.getTime()
 		cName = "c" + t
-		header = "<svg class='#{cName}' x='0px' y='0px' width='#{options.width}' height='#{options.height}' viewBox='-#{options.strokeWidth/2} -#{options.strokeWidth/2} #{options.width + options.strokeWidth/2} #{options.height + options.strokeWidth/2}'>"
+		header = "<svg class='#{cName}' x='0px' y='0px' width='#{@width}' height='#{@height}' viewBox='-#{@strokeWidth/2} -#{@strokeWidth/2} #{@width + @strokeWidth/2} #{@height + @strokeWidth/2}'>"
 		path = options.path
 		footer = "</svg>"
-
-		#Hack to get pathLength before construction
-		svgPath = new Layer
-			html : header + path + footer
-			width : options.width
-			height : options.height
-			backgroundColor: "transparent"
-		domPath = document.querySelector('.'+cName+' path')
-		pathLength = domPath.getTotalLength()
-		svgPath.destroy()
-
 		@html = header + path + footer
-		@backgroundColor = "transparent"
-		@width = options.width
-		@height = options.height
-		@perspective = 0
-		@direction = "forward"
-		@style = {"fill":"transparent";"stroke":"#32A2E6";"stroke-linecap":"round";"stroke-width":options.strokeWidth;"stroke-dasharray":pathLength;"stroke-dashoffset":0}
-		@pathLength = pathLength
 
-		#Animation Magic
-		@states.add
-			forward:
-				perspective: 1
-		@states.animationOptions = 
-			curve:"ease-out"
-			time: 1
-		@.on "change:perspective", ->
-			if @direction == "forward"
-				dashOffset = Utils.modulate(@.perspective, [0, 1], [pathLength, 0])
-				@.style['stroke-dashoffset'] = dashOffset
-			else if @direction == "backward"
-				dashOffset = Utils.modulate(@.perspective, [0, 1], [pathLength, pathLength*2])
-				@.style['stroke-dashoffset'] = dashOffset
+		# wait with querying pathlength for when dom is finished
+		Utils.domComplete =>
+			domPath = document.querySelector('.'+cName+' path')
+			@_pathLength = domPath.getTotalLength()
+			@style = {"stroke-dasharray":@pathLength;}
+			@dashOffset = options.dashOffset
 
-	animatePath: (options={}) =>
-		options.direction ?= "forward"
-		options.curve ?= "ease-out"
-		options.time ?= 1
-		@states.animationOptions = 
-			curve: options.curve
-			time: options.time
-		@direction = options.direction
-		@states.next()
+	@define "pathLength",
+		get: -> @_pathLength
+		set: (value) -> print "SVGLayer.pathLength is readonly"
+
+	@define "linecap",
+		get: -> @style.strokeLinecap
+		set: (value) ->
+			@style.strokeLinecap = value
+
+	@define "strokeLinecap",
+		get: -> @style.strokeLinecap
+		set: (value) ->
+			@style.strokeLinecap = value
+
+	@define "fill",
+		get: -> @style.fill
+		set: (value) ->
+			if value == null
+				value = "transparent"
+			@style.fill = value
+
+	@define "stroke",
+		get: -> @style.stroke
+		set: (value) -> @style.stroke = value
+
+	@define "strokeColor",
+		get: -> @style.stroke
+		set: (value) -> @style.stroke = value
+
+	@define "strokeWidth",
+		get: -> Number(@style.strokeWidth.replace(/[^\d.-]/g, ''))
+		set: (value) ->
+			@style.strokeWidth = value
+
+	@define "dashOffset",
+		get: -> @_dashOffset
+		set: (value) ->
+			@_dashOffset = value
+			if @pathLength?
+				dashOffset = Utils.modulate(value, [0, 1], [@pathLength, 0])
+				@style.strokeDashoffset = dashOffset
