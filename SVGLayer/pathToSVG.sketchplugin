@@ -17,7 +17,7 @@ var clipboard = {
   },
 };
 
-var selection = context.selection; 
+var selection = context.selection;
 var layer = selection[0];
 // Store the original coordinates, move to (0,0) for accurate SVG path data, move back
 var oldX = layer.frame().x();
@@ -28,10 +28,10 @@ var rect = [[layer frame] rect];
 var width = rect.size.width;
 var height = rect.size.height;
 var bezier = [layer bezierPath];
-var svg = [bezier svgAttributes][0];
+var svg = [bezier svgPathAttribute];
 var svgString = svg.toString();
 layer.frame().x = oldX;
-layer.frame().y = oldY;              
+layer.frame().y = oldY;
 
 svgString = "\tstrokeWidth: 2\n\twidth: " + width +"\n\theight: " + height + "\n\tpath: '<path " + svgString + "></path>'"
 
